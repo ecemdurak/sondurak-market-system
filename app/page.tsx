@@ -90,7 +90,7 @@ export default function Home() {
           </button>
         ))}
       </div>
-      
+
       <h2 id="products">Ürünler</h2>
 
       <div className="products-container">
@@ -98,7 +98,7 @@ export default function Home() {
           <div className="product-card" key={product.id}>
             {product.image && <img src={product.image} alt={product.title} />}
 
-            <h2>{product.title}</h2>
+            <h2>{product.title} {product.id}</h2>
 
             <p>Fiyat: {Number(product.price).toFixed(2)} TL</p>
 

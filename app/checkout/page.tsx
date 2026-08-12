@@ -18,7 +18,7 @@ type PayThorResponse = {
 export default function CheckoutPage() {
     const router = useRouter();
     const { cart, clearCart } = useCartStore();
-
+    console.log("CheckoutPage cart:", cart); // Sepet içeriğini kontrol etmek için log ekledim
     //setForm güncelleme
     const [form, setForm] = useState({
         firstName: "",
@@ -177,7 +177,7 @@ export default function CheckoutPage() {
                 paymentStatus: "pending",
                 //sepet->sipariş ????
                 items: cart.map((item: any) => ({
-                    productId: null,
+                    productId: item.id,
                     productTitle: item.title,
                     unitPrice: Number(item.price).toFixed(2),
                     quantity: item.quantity || 1,
@@ -274,6 +274,7 @@ export default function CheckoutPage() {
                     data.message || `Ödeme oluşturulamadı. Status: ${response.status}`
                 );
             }
+
 
             const link = data.data?.payment_link;
 

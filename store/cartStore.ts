@@ -14,6 +14,7 @@ export const useCartStore = create<CartStore>()(
             cart: [],
 
             addToCart: (product) => {
+                console.log("Adding product to cart:", product);
                 set((state) => {
                     const existingProduct = state.cart.find(
                         (item: any) => item.id === product.id

@@ -1,0 +1,1 @@
+export type CreatePaymentDto = Record<string, unknown>;

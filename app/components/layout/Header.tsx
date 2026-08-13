@@ -4,9 +4,9 @@ import { Icon } from "@iconify/react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
-import { useCartStore } from "../../store/cartStore";
+import { useCartStore } from "../../../store/cartStore";
 import { useLocale, useTranslations } from "next-intl";
-import { CartDrawer } from "./cart/CartDrawer";
+import { CartDrawer } from "../cart/CartDrawer";
 
 export default function Header() {
     const { cart, removeFromCart } = useCartStore();

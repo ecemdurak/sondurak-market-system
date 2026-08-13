@@ -5,6 +5,10 @@ import { BrowserMultiFormatReader } from "@zxing/browser";
 import { useTranslations } from "next-intl";
 import { useProductStore } from "../../store/productStore";
 import { useCartStore } from "../../store/cartStore";
+import { ScannerVideo } from "../components/scanner/ScannerVideo";
+import { ScannerDebugPanel } from "../components/scanner/ScannerDebugPanel";
+import type { Product } from "../types/product";
+
 
 export default function ScannerPage() {
     const t = useTranslations("scanner");
@@ -47,7 +51,7 @@ export default function ScannerPage() {
                 undefined,
                 videoRef.current!,
                 //kamera barkod gördükçe bu fonksiyon çalışır
-                
+
                 (result) => {
                     if (!result) return;
 
@@ -70,7 +74,7 @@ export default function ScannerPage() {
                     };
 
                     const foundProduct = products.find(
-                        (product: any) => product.barcode === barcode
+                        (product: Product) => product.barcode === barcode
                     );
 
                     if (!foundProduct) {
@@ -99,21 +103,15 @@ export default function ScannerPage() {
             {isFlashing && <div className="scanner-flash" />}
             <h1>{t("title")}</h1>
 
-            <video
-                ref={videoRef}
-                style={{
-                    width: "100%",
-                    maxWidth: "500px",
-                    borderRadius: "12px",
-                    backgroundColor: "black",
-                }}
-            />
+            <ScannerVideo videoRef={videoRef} />
 
             {message && <p>{message}</p>}
-            <div style={{ marginTop: "16px" }}>
-                <p>{t("lastBarcode")}: {debugBarcode || "-"}</p>
-                <p>{t("status")}: {debugStatus || "-"}</p>
-            </div>
+            <ScannerDebugPanel
+                lastBarcodeLabel={t("lastBarcode")}
+                statusLabel={t("status")}
+                barcode={debugBarcode}
+                status={debugStatus}
+            />
         </main>
     );
 }

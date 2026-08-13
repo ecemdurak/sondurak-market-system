@@ -2,39 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useCategoryStore } from "../../store/categoryStore";
 import { useProductStore } from "../../store/productStore";
+import { AdminHeader } from "../components/admin/AdminHeader";
+import { AdminTabs } from "../components/admin/AdminTabs";
+import { AdminProductForm } from "../components/admin/AdminProductForm";
+import { AdminProductList } from "../components/admin/AdminProductList";
+import { AdminOrderList } from "../components/admin/AdminOrderList";
+import type { Product } from "../types/product";
+import type { Order } from "../types/order";
 
-
-type Product = {
-  id: number;
-  title: string;
-  price: number | string;
-  image?: string | null;
-  category?: string | null;
-  barcode?: string;
-};
-
-type OrderItem = {
-  id: number;
-  productTitle: string;
-  quantity: number;
-  unitPrice: number | string;
-  totalPrice: number | string;
-};
-
-type Order = {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  totalPrice: number | string;
-  currency: string;
-  paymentStatus: string;
-  createdAt: string;
-  items?: OrderItem[];
-};
 
 export default function AdminPage() {
   const { products, getProducts, addProduct, updateProduct, deleteProduct } =
@@ -158,6 +135,15 @@ export default function AdminPage() {
       setMessage(errorMessage);
     }
   }
+  function handleEditProduct(product: Product) {
+    setEditingProductId(product.id);
+    setTitle(product.title);
+    setPrice(String(product.price));
+    setImage(product.image || "");
+    setCategory(product.category || "");
+    setBarcode(product.barcode || "");
+    setMessage("");
+  }
 
   async function handleLogout() {
     await fetch("/api/admin/logout", {
@@ -169,217 +155,45 @@ export default function AdminPage() {
 
   return (
     <main className="admin-page">
-      <div className="admin-header">
-        <div>
-          <p>Yönetim</p>
-          <h1>Admin Paneli</h1>
-        </div>
-        <div className="admin-header-actions">
-          <Link href="/">Mağazaya dön</Link>
+      <AdminHeader onLogout={handleLogout} />
 
-          <button type="button" onClick={handleLogout}>
-            Çıkış Yap
-          </button>
-        </div>
-      </div>
-
-      <div className="admin-tabs">
-        <button
-          type="button"
-          className={activeSection === "products" ? "active" : ""}
-          onClick={() => setActiveSection("products")}
-        >
-          Ürünler
-        </button>
-
-        <button
-          type="button"
-          className={activeSection === "orders" ? "active" : ""}
-          onClick={() => setActiveSection("orders")}
-        >
-          Siparişler
-        </button>
-      </div>
+      <AdminTabs
+        activeSection={activeSection}
+        onChangeSection={setActiveSection}
+      />
       <div className="admin-content">
         {activeSection === "products" && (
           <>
-            <section className="admin-form-panel">
-              <h2>{editingProductId ? "Ürünü Düzenle" : "Yeni Ürün Ekle"}</h2>
+            <AdminProductForm
+              title={title}
+              price={price}
+              image={image}
+              barcode={barcode}
+              category={category}
+              categories={categories}
+              categoryNames={categoryNames}
+              editingProductId={editingProductId}
+              isSaving={isSaving}
+              message={message}
+              onTitleChange={setTitle}
+              onPriceChange={setPrice}
+              onImageChange={setImage}
+              onBarcodeChange={setBarcode}
+              onCategoryChange={setCategory}
+              onSubmit={handleSubmit}
+              onReset={resetForm}
+            />
 
-              <form onSubmit={handleSubmit}>
-                <label>
-                  Ürün Adı
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(event) => setTitle(event.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Fiyat
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={price}
-                    onChange={(event) => setPrice(event.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Resim URL
-                  <input
-                    type="text"
-                    value={image}
-                    onChange={(event) => setImage(event.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Barkod
-                  <input
-                    type="text"
-                    value={barcode}
-                    onChange={(event) => setBarcode(event.target.value)}
-                  />
-                </label>
-
-                <label>
-                  Kategori
-                  <select
-                    value={category}
-                    onChange={(event) => setCategory(event.target.value)}
-                  >
-                    <option value="">Kategori Seç </option>
-
-                    {categories.map((item) => (
-                      <option key={item} value={item}>
-                        {categoryNames[item] || item}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <div className="admin-form-actions">
-                  <button type="submit" disabled={isSaving}>
-                    {isSaving
-                      ? "Kaydediliyor..."
-                      : editingProductId
-                        ? "Ürünü Güncelle"
-                        : "Ürün Ekle"}
-                  </button>
-
-                  {editingProductId && (
-                    <button type="button" className="secondary-button" onClick={resetForm}>
-                      Vazgec
-                    </button>
-                  )}
-                </div>
-              </form>
-
-              {message && <p className="admin-message">{message}</p>}
-            </section>
-
-            <section className="admin-products-panel">
-              <div className="admin-section-header">
-                <h2>Ürünler</h2>
-                <span>{products.length} ürün</span>
-              </div>
-
-              <div className="admin-products-list">
-                {products.map((product: Product) => (
-                  <article className="admin-product-row" key={product.id}>
-                    <div className="admin-product-info">
-                      {product.image && <img src={product.image} alt={product.title} />}
-
-                      <div>
-                        <h3>{product.title}</h3>
-                        <p>
-                          {product.category
-                            ? categoryNames[product.category] || product.category
-                            : "Kategori yok"}
-                        </p>
-                        <strong>{Number(product.price).toFixed(2)} TL</strong>
-                      </div>
-                    </div>
-
-                    <div className="admin-product-actions">
-                      <button
-                        type="button"
-                        className="edit-button"
-                        onClick={() => {
-                          setEditingProductId(product.id);
-                          setTitle(product.title);
-                          setPrice(String(product.price));
-                          setImage(product.image || "");
-                          setCategory(product.category || "");
-                          setBarcode(product.barcode || "");
-                          setMessage("");
-                        }}
-                      >
-                        Düzenle
-                      </button>
-
-                      <button
-                        type="button"
-                        className="delete-button"
-                        onClick={() => {
-                          const isConfirmed = window.confirm(
-                            "Bu ürünü silmek istediğine emin misin?"
-                          );
-
-                          if (isConfirmed) {
-                            handleDelete(product.id);
-                          }
-                        }}
-                      >
-                        Sil
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </section>
+            <AdminProductList
+              products={products}
+              categoryNames={categoryNames}
+              onEditProduct={handleEditProduct}
+              onDeleteProduct={handleDelete}
+            />
           </>
         )}
         {activeSection === "orders" && (
-          <section className="admin-orders-panel">
-            <div className="admin-section-header">
-              <h2>Siparişler</h2>
-              <span>{orders.length} sipariş</span>
-            </div>
-
-            <div className="admin-orders-list">
-              {orders.length === 0 ? (
-                <p>Henüz sipariş yok.</p>
-              ) : (
-                orders.map((order) => (
-                  <article className="admin-order-row" key={order.id}>
-                    <div>
-                      <h3>#{order.id} - {order.firstName} {order.lastName}</h3>
-                      <p>{order.email}</p>
-                      <p>
-                        Toplam: {Number(order.totalPrice).toFixed(2)} {order.currency}
-                      </p>
-                      <p>Durum: {order.paymentStatus}</p>
-                    </div>
-
-                    {order.items && order.items.length > 0 && (
-                      <div className="admin-order-items">
-                        {order.items.map((item) => (
-                          <p key={item.id}>
-                            {item.productTitle} x{item.quantity} -{" "}
-                            {Number(item.totalPrice).toFixed(2)} {order.currency}
-                          </p>
-                        ))}
-                      </div>
-                    )}
-                  </article>
-                ))
-              )}
-            </div>
-          </section>
+          <AdminOrderList orders={orders} />
         )}
       </div>
     </main>

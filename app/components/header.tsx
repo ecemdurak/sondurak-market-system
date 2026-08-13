@@ -1,13 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { Icon } from "@iconify/react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import { useState } from "react";
 import { useCartStore } from "../../store/cartStore";
-import { usePathname } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { CartDrawer } from "./cart/CartDrawer";
 
 export default function Header() {
     const { cart, removeFromCart } = useCartStore();
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const t = useTranslations("header");
+    const homeT = useTranslations("home");
+    const locale = useLocale();
+    const router = useRouter();
+    const categoryLinks = [
+        { value: "electronics", label: homeT("categoryElectronics") },
+        { value: "clothing", label: homeT("categoryClothing") },
+        { value: "shoes", label: homeT("categoryShoes") },
+        { value: "accessories", label: homeT("categoryAccessories") },
+        { value: "snacks", label: homeT("categorySnacks") },
+        { value: "drinks", label: homeT("categoryDrinks") },
+    ];
+
+    function handleLanguageChange() {
+        const nextLocale = locale === "tr" ? "en" : "tr";
+
+        document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`;
+        router.refresh();
+    }
 
     const pathname = usePathname();
 
@@ -25,89 +47,77 @@ export default function Header() {
         0
     );
 
-
     return (
         <>
             <header className="header">
                 <div className="header-inner">
                     <Link href="/" className="header-logo">
+                        <Icon icon="solar:signpost-2-bold" width={32} height={32} />
                         SonDurak
                     </Link>
 
                     <nav>
-                        <Link href="/#products">Ürünler</Link>
-                        <Link href="/#categories">Kategoriler</Link>
-                        <Link href="/scanner">Barkod Okut</Link>
+                        <Link href="/#products">
+                            <Icon icon="solar:box-bold" width={18} height={18} />
+                            {t("products")}
+                        </Link>
+                        <div className="header-category-menu">
+                            <Link href="/#products" className="header-category-trigger">
+                                <Icon icon="solar:widget-2-bold" width={18} height={18} />
+                                {t("categories")}
+                                <Icon icon="solar:alt-arrow-down-bold" width={14} height={14} />
+                            </Link>
+
+                            <div className="header-category-dropdown">
+                                <Link href="/#products">{homeT("all")}</Link>
+
+                                {categoryLinks.map((category) => (
+                                    <Link
+                                        key={category.value}
+                                        href={`/?category=${category.value}#products`}
+                                    >
+                                        {category.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                        <Link href="/scanner">
+                            <Icon icon="solar:scanner-bold" width={18} height={18} />
+                            {t("barcode")}
+                        </Link>
+
+
 
                         <button
                             type="button"
                             className="header-cart-button"
                             onClick={() => setIsCartOpen(true)}
                         >
-                            Sepet ({cartCount})
+                            <Icon icon="solar:cart-large-bold" width={20} height={20} />
+                            {t("cart")} ({cartCount})
                         </button>
+
+                        <button
+                            type="button"
+                            className="language-toggle"
+                            onClick={handleLanguageChange}
+                            aria-label={t("changeLanguage")}
+                        >
+                            {locale === "tr" ? "EN" : "TR"}
+                        </button>
+
                     </nav>
                 </div>
             </header>
 
             {isCartOpen && (
-                <>
-                    <div
-                        className="cart-overlay"
-                        onClick={() => setIsCartOpen(false)}
-                    />
-
-                    <aside className="cart-drawer">
-                        <div className="cart-drawer-header">
-                            <h2>Sepetim</h2>
-
-                            <button
-                                type="button"
-                                onClick={() => setIsCartOpen(false)}
-                            >
-                                X
-                            </button>
-                        </div>
-
-                        {cart.length === 0 ? (
-                            <p>Sepetiniz boş.</p>
-                        ) : (
-                            cart.map((item: any, index: number) => (
-                                <div className="cart-drawer-item" key={`${item.id}-${index}`}>
-                                    <div>
-                                        <strong>{item.title}</strong>
-                                        <p>
-                                            {Number(item.price).toFixed(2)} ₺
-                                            {" "}x{item.quantity || 1}
-                                        </p>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        className="cart-remove-button"
-                                        onClick={() => removeFromCart(index)}
-                                    >
-                                        Sil
-                                    </button>
-                                </div>
-                            ))
-                        )}
-
-                        {cart.length > 0 && (
-                            <div className="cart-drawer-footer">
-                                <h3>Toplam: {totalPrice.toFixed(2)} ₺</h3>
-
-                                <Link
-                                    href="/checkout"
-                                    className="checkout-button"
-                                    onClick={() => setIsCartOpen(false)}
-                                >
-                                    Ödemeye Geç
-                                </Link>
-                            </div>
-                        )}
-                    </aside>
-                </>
+                <CartDrawer
+                    cart={cart}
+                    totalPrice={totalPrice}
+                    onClose={() => setIsCartOpen(false)}
+                    onRemove={removeFromCart}
+                    t={t}
+                />
             )}
         </>
     );

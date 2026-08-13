@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 
 type OrderItem = {
     id: number;
@@ -37,6 +38,7 @@ export default async function ThankYouPage({
 }: {
     params: Promise<{ id: string }>;
 }) {
+    const t = await getTranslations("thankYou");
     const { id } = await params;
     const order = await getOrder(id);
 
@@ -44,57 +46,55 @@ export default async function ThankYouPage({
         return (
             <main className="thank-you-page">
                 <section className="thank-you-card">
-                    <h1>Sipariş bulunamadı</h1>
-                    <p>Aradığınız sipariş bilgisine ulaşılamadı.</p>
-                    <Link href="/">Ana sayfaya dön</Link>
+                    <h1>{t("notFoundTitle")}</h1>
+                    <p>{t("notFoundDescription")}</p>
+                    <Link href="/">{t("backToHome")}</Link>
                 </section>
             </main>
         );
     }
 
+    const paymentStatus =
+        order.paymentStatus === "paid"
+            ? t("paymentPaid")
+            : order.paymentStatus === "active"
+                ? t("paymentPending")
+                : order.paymentStatus;
+
     return (
         <main className="thank-you-page">
             <section className="thank-you-card">
-                <p className="thank-you-status">Siparişiniz  oluşturuldu</p>
+                <p className="thank-you-status">{t("orderCreated")}</p>
 
-                <h1>Teşekkürler, {order.firstName}!</h1>
+                <h1>{t("thanks", { name: order.firstName })}</h1>
 
-                <p>
-                    Siparişiniz başarıyla kaydedildi. Ödeme durumunuzu aşağıdaki
-                    bilgilerle takip edebilirsiniz.
-                </p>
+                <p>{t("description")}</p>
 
                 <div className="thank-you-details">
                     <div>
-                        <span>Sipariş No</span>
+                        <span>{t("orderNo")}</span>
                         <strong>{order.merchantReference}</strong>
                     </div>
 
                     <div>
-                        <span>Ödeme Durumu</span>
-                        <strong>
-                            {order.paymentStatus === "paid"
-                                ? "Ödeme onaylandı"
-                                : order.paymentStatus === "active"
-                                    ? "Ödeme bekleniyor"
-                                    : order.paymentStatus}
-                        </strong>
+                        <span>{t("paymentStatus")}</span>
+                        <strong>{paymentStatus}</strong>
                     </div>
 
                     <div>
-                        <span>E-posta</span>
+                        <span>{t("email")}</span>
                         <strong>{order.email}</strong>
                     </div>
 
                     <div>
-                        <span>Toplam</span>
+                        <span>{t("total")}</span>
                         <strong>
                             {Number(order.totalPrice).toFixed(2)} {order.currency}
                         </strong>
                     </div>
                 </div>
 
-                <h2>Alınan Ürünler</h2>
+                <h2>{t("items")}</h2>
 
                 <div className="thank-you-items">
                     {order.items.map((item) => (
@@ -115,7 +115,7 @@ export default async function ThankYouPage({
                 </div>
 
                 <div className="thank-you-actions">
-                    <Link href="/">Alışverişe devam et</Link>
+                    <Link href="/">{t("continueShopping")}</Link>
                 </div>
             </section>
         </main>

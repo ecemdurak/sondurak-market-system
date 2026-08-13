@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { useCartStore } from "../../store/cartStore";
+import { CheckoutForm } from "../components/checkout/CheckoutForm";
+import { CheckoutSummary } from "../components/checkout/CheckoutSummary";
+import { PaymentModal } from "../components/checkout/PaymentModal";
 
 //payment api cevabı tipleri
 type PayThorResponse = {
@@ -16,6 +20,7 @@ type PayThorResponse = {
 };
 
 export default function CheckoutPage() {
+    const t = useTranslations("checkout");
     const router = useRouter();
     const { cart, clearCart } = useCartStore();
     console.log("CheckoutPage cart:", cart); // Sepet içeriğini kontrol etmek için log ekledim
@@ -73,7 +78,7 @@ export default function CheckoutPage() {
                 //console.log(data?.processID);
 
                 if (!paymentToken) {
-                    setMessage("Ödeme token bulunamadı, ödeme durumu sorgulanamadı.");
+                    setMessage(t("missingPaymentToken"));
                     return;
                 }
                 const myHeaders = new Headers();
@@ -101,7 +106,7 @@ export default function CheckoutPage() {
 
 
                 if (!isPaymentPaid) {
-                    setMessage("Ödeme PayThor üzerinden doğrulanamadı.");
+                    setMessage(t("paymentNotVerified"));
                     return;
                 }
 
@@ -127,7 +132,7 @@ export default function CheckoutPage() {
             window.removeEventListener("message", handlePaymentMessage);
         };
         //değişirse yenile
-    }, [createdOrderId, paymentToken, clearCart, router]);
+    }, [createdOrderId, paymentToken, clearCart, router, t]);
 
     const totalPrice = cart.reduce(
         (total, item: any) =>
@@ -138,7 +143,7 @@ export default function CheckoutPage() {
     //ödemeyi başlat
     async function createPayment() {
         if (cart.length === 0) {
-            setMessage("Ödeme oluşturmak için sepette ürün bulunmalıdır.");
+            setMessage(t("cartRequired"));
             return;
         }
 
@@ -152,7 +157,7 @@ export default function CheckoutPage() {
             !form.district ||
             !form.postalCode
         ) {
-            setMessage("Lütfen tüm ödeyen ve adres bilgilerini doldurun.");
+            setMessage(t("payerInfoRequired"));
             return;
         }
         setIsLoading(true);
@@ -172,16 +177,16 @@ export default function CheckoutPage() {
                 city: form.city,
                 district: form.district,
                 postalCode: form.postalCode,
-                totalPrice: totalPrice.toFixed(2),
+                totalPrice: Number(totalPrice.toFixed(2)),
                 currency: "TRY",
                 paymentStatus: "pending",
                 //sepet->sipariş ????
                 items: cart.map((item: any) => ({
                     productId: item.id,
                     productTitle: item.title,
-                    unitPrice: Number(item.price).toFixed(2),
+                    unitPrice: Number(Number(item.price).toFixed(2)),
                     quantity: item.quantity || 1,
-                    totalPrice: (Number(item.price) * (item.quantity || 1)).toFixed(2),
+                    totalPrice: Number((Number(item.price) * (item.quantity || 1)).toFixed(2)),
                 })),
             };
 
@@ -196,7 +201,7 @@ export default function CheckoutPage() {
 
             if (!orderResponse.ok) {
                 //400 500 catch->
-                throw new Error("Sipariş database'e kaydedilemedi.");
+                throw new Error(t("orderCreateFailed"));
             }
             const createdOrder = await orderResponse.json();
             setCreatedOrderId(createdOrder.id);
@@ -271,7 +276,7 @@ export default function CheckoutPage() {
 
             if (!response.ok || data.status !== "success") {
                 throw new Error(
-                    data.message || `Ödeme oluşturulamadı. Status: ${response.status}`
+                    data.message || t("paymentCreateFailed", { status: response.status })
                 );
             }
 
@@ -281,10 +286,10 @@ export default function CheckoutPage() {
             const token = data.data?.payment_token;
 
             if (!link) {
-                throw new Error("PayThor cevabında payment_link bulunamadı.");
+                throw new Error(t("paymentLinkMissing"));
             }
             if (!token) {
-                throw new Error("PayThor cevabında payment_token bulunamadı.");
+                throw new Error(t("paymentTokenMissing"));
             }
             //token ve linki siparişe kaydetme
             await fetch(`/api/orders/${createdOrder.id}`, {
@@ -306,7 +311,7 @@ export default function CheckoutPage() {
             //throw new error
         } catch (error) {
             const errorMessage =
-                error instanceof Error ? error.message : "Bilinmeyen bir hata oluştu.";
+                error instanceof Error ? error.message : t("unknownError");
 
             setMessage(errorMessage);
         } finally {
@@ -317,124 +322,26 @@ export default function CheckoutPage() {
     return (
         <main className="checkout-page">
             <div className="checkout-header">
-                <h1>Ödeme</h1>
-                <Link href="/">Ana Sayfaya Dön</Link>
+                <h1>{t("title")}</h1>
+                <Link href="/">{t("backToHome")}</Link>
             </div>
 
             <div className="checkout-content">
-                <section className="checkout-form">
-                    <h2>Ödeyen Bilgileri</h2>
+                <CheckoutForm form={form} setForm={setForm} />
 
-                    <input
-                        type="text"
-                        placeholder="Ad"
-                        value={form.firstName}
-                        onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Soyad"
-                        value={form.lastName}
-                        onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                    />
-
-                    <input
-                        type="email"
-                        placeholder="E-posta"
-                        value={form.email}
-                        onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    />
-
-                    <input
-                        type="tel"
-                        placeholder="Telefon"
-                        value={form.phone}
-                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    />
-
-                    <textarea
-                        placeholder="Açık Adres"
-                        value={form.address}
-                        onChange={(e) => setForm({ ...form, address: e.target.value })}
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Şehir"
-                        value={form.city}
-                        onChange={(e) => setForm({ ...form, city: e.target.value })}
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="İlçe"
-                        value={form.district}
-                        onChange={(e) => setForm({ ...form, district: e.target.value })}
-                    />
-
-                    <input
-                        type="text"
-                        placeholder="Posta Kodu"
-                        value={form.postalCode}
-                        onChange={(e) => setForm({ ...form, postalCode: e.target.value })}
-                    />
-                </section>
-
-                <section className="checkout-summary">
-                    <h2>Sipariş Özeti</h2>
-
-                    {cart.length === 0 ? (
-                        <p>Sepetiniz boş.</p>
-                    ) : (
-                        cart.map((item: any, index: number) => (
-                            <div className="checkout-item" key={`${item.id}-${index}`}>
-                                <span>
-                                    {item.title} x{item.quantity || 1}
-                                </span>
-
-                                <strong>
-                                    {(Number(item.price) * (item.quantity || 1)).toFixed(2)} ₺
-                                </strong>
-                            </div>
-                        ))
-                    )}
-
-                    <h3>Toplam: {totalPrice.toFixed(2)} ₺</h3>
-
-                    <button
-                        type="button"
-                        onClick={createPayment}
-                        disabled={isLoading || cart.length === 0}
-                    >
-                        {isLoading ? "Ödeme hazırlanıyor..." : "Ödemeyi Başlat"}
-                    </button>
-
-                    {message && <p className="payment-error">{message}</p>}
-                </section>
+                <CheckoutSummary
+                    cart={cart}
+                    totalPrice={totalPrice}
+                    isLoading={isLoading}
+                    message={message}
+                    onCreatePayment={createPayment}
+                />
             </div>
 
-            {paymentLink && (
-                <div className="payment-modal-overlay">
-                    <div className="payment-modal">
-                        <div className="payment-modal-header">
-                            <h2>Güvenli Ödeme</h2>
-
-                            <button type="button" onClick={() => setPaymentLink("")}>
-                                X
-                            </button>
-                        </div>
-
-                        <iframe
-                            src={paymentLink}
-                            title="PayThor ödeme ekranı"
-                            className="payment-modal-frame"
-                            allow="payment"
-                        />
-
-                    </div>
-                </div>
-            )}
+            <PaymentModal
+                paymentLink={paymentLink}
+                onClose={() => setPaymentLink("")}
+            />
         </main>
     );
 }

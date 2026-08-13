@@ -13,8 +13,8 @@ function isBlank(value: string) {
     return typeof value !== "string" || value.trim().length === 0;
 }
 
-function isInvalidPositiveNumber(value: string) {
-    return typeof value !== "string"
+function isInvalidPositiveNumber(value: number) {
+    return typeof value !== "number" || !Number.isFinite(value) || value <= 0;
 }
 
 function isInvalidEmail(email: string) {

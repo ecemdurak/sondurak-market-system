@@ -1,14 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useProductStore } from "../store/productStore";
-import { useCategoryStore } from "../store/categoryStore";
 import { useCartStore } from "../store/cartStore";
+import { BarcodeForm } from "./components/product/BarcodeForm";
+import { ProductGrid } from "./components/product/ProductGrid";
+import { useTranslations } from "next-intl";
 
 export default function Home() {
+  const searchParams = useSearchParams();
   const { products, getProducts } = useProductStore();
-  const { categories, getCategories } = useCategoryStore();
   const { addToCart } = useCartStore();
+  const t = useTranslations("home");
 
   const [selectedCategory, setSelectedCategory] = useState("");
   const [cartMessage, setCartMessage] = useState("");
@@ -16,21 +20,38 @@ export default function Home() {
 
   useEffect(() => {
     getProducts();
-    getCategories();
   }, []);
 
-  const categoryNames: { [key: string]: string } = {
-    electronics: "Elektronik",
-    clothing: "Giyim",
-    shoes: "Ayakkabı",
-    accessories: "Aksesuar",
-    snacks: "Atıştırmalık",
-    drinks: "İçecek",
+  useEffect(() => {
+    const categoryFromUrl = searchParams.get("category");
+
+    setSelectedCategory(categoryFromUrl || "");
+  }, [searchParams]);
+
+  const categoryNames: Record<string, string> = {
+    electronics: t("categoryElectronics"),
+    clothing: t("categoryClothing"),
+    shoes: t("categoryShoes"),
+    accessories: t("categoryAccessories"),
+    snacks: t("categorySnacks"),
+    drinks: t("categoryDrinks"),
   };
+
+  const productSectionTitle = selectedCategory
+    ? categoryNames[selectedCategory] || t("products")
+    : t("products");
 
   const filteredProducts = selectedCategory
     ? products.filter((product: any) => product.category === selectedCategory)
     : products;
+
+  function showCartMessage(message: string) {
+    setCartMessage(message);
+
+    setTimeout(() => {
+      setCartMessage("");
+    }, 2000);
+  }
 
   function handleBarcodeSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -46,80 +67,35 @@ export default function Home() {
     );
 
     if (!foundProduct) {
-      setCartMessage("Bu barkoda ait ürün bulunamadı.");
+      showCartMessage(t("barcodeNotFound"));
       setBarcodeInput("");
-
-      setTimeout(() => {
-        setCartMessage("");
-      }, 2000);
-
       return;
     }
 
     addToCart(foundProduct);
-    setCartMessage(`${foundProduct.title} sepete eklendi.`);
+    showCartMessage(`${foundProduct.title} ${t("addedToCart")}`);
     setBarcodeInput("");
+  }
 
-    setTimeout(() => {
-      setCartMessage("");
-    }, 2000);
+  function handleAddToCart(product: any) {
+    addToCart(product);
+    showCartMessage(`${product.title} ${t("addedToCart")}`);
   }
 
   return (
     <main>
-      <form id="barcode" onSubmit={handleBarcodeSubmit} className="barcode-form">
-        <input
-          type="text"
-          placeholder="Barkod yaz"
-          value={barcodeInput}
-          onChange={(event) => setBarcodeInput(event.target.value)}
-        />
+      <BarcodeForm
+        barcodeInput={barcodeInput}
+        onBarcodeInputChange={setBarcodeInput}
+        onSubmit={handleBarcodeSubmit}
+      />
 
-        <button type="submit">Barkodla Sepete Ekle</button>
-      </form>
+      <h2 id="products">{productSectionTitle}</h2>
 
-
-      <h2 id="categories">Kategoriler</h2>
-
-      <div className="category-list">
-        <button onClick={() => setSelectedCategory("")}>Tümü</button>
-
-        {categories.map((category) => (
-          <button key={category} onClick={() => setSelectedCategory(category)}>
-            {categoryNames[category] || category}
-          </button>
-        ))}
-      </div>
-
-      <h2 id="products">Ürünler</h2>
-
-      <div className="products-container">
-        {filteredProducts.map((product: any) => (
-          <div className="product-card" key={product.id}>
-            {product.image && <img src={product.image} alt={product.title} />}
-
-            <h2>{product.title} {product.id}</h2>
-
-            <p>Fiyat: {Number(product.price).toFixed(2)} TL</p>
-
-            <div className="product-actions">
-              <button
-                type="button"
-                onClick={() => {
-                  addToCart(product);
-                  setCartMessage(`${product.title} sepete eklendi.`);
-
-                  setTimeout(() => {
-                    setCartMessage("");
-                  }, 2000);
-                }}
-              >
-                Sepete Ekle
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ProductGrid
+        products={filteredProducts}
+        onAddToCart={handleAddToCart}
+      />
 
       {cartMessage && <div className="cart-toast">{cartMessage}</div>}
     </main>

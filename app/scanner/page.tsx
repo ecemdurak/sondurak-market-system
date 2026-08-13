@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader } from "@zxing/browser";
+import { useTranslations } from "next-intl";
 import { useProductStore } from "../../store/productStore";
 import { useCartStore } from "../../store/cartStore";
 
 export default function ScannerPage() {
+    const t = useTranslations("scanner");
     const videoRef = useRef<HTMLVideoElement>(null);
 
     const { products, getProducts } = useProductStore();
@@ -58,7 +60,7 @@ export default function ScannerPage() {
                         barcode === lastScanRef.current.barcode &&
                         now - lastScanRef.current.time < 2000
                     ) {
-                        setDebugStatus("Aynı barkod çok hızlı tekrar okundu, eklenmedi.");
+                        setDebugStatus(t("duplicateScan"));
                         return;
                     }
 
@@ -72,14 +74,14 @@ export default function ScannerPage() {
                     );
 
                     if (!foundProduct) {
-                        setMessage("Bu barkoda ait ürün bulunamadı.");
-                        setDebugStatus("Barkod okundu ama ürünlerde eşleşme yok.");
+                        setMessage(t("barcodeNotFound"));
+                        setDebugStatus(t("notMatched"));
                         return;
                     }
 
                     addToCart(foundProduct);
-                    setMessage(`${foundProduct.title} sepete eklendi.`);
-                    setDebugStatus("Ürün bulundu ve sepete eklendi.");
+                    setMessage(`${foundProduct.title} ${t("addedToCart")}`);
+                    setDebugStatus(t("productAdded"));
                     triggerFlash();
                 }
             );
@@ -90,12 +92,12 @@ export default function ScannerPage() {
         return () => {
             controls?.stop();
         };
-    }, [products, addToCart]);
+    }, [products, addToCart, t]);
 
     return (
         <main>
             {isFlashing && <div className="scanner-flash" />}
-            <h1>Barkod Okut</h1>
+            <h1>{t("title")}</h1>
 
             <video
                 ref={videoRef}
@@ -109,8 +111,8 @@ export default function ScannerPage() {
 
             {message && <p>{message}</p>}
             <div style={{ marginTop: "16px" }}>
-                <p>Son okunan barkod: {debugBarcode || "-"}</p>
-                <p>Durum: {debugStatus || "-"}</p>
+                <p>{t("lastBarcode")}: {debugBarcode || "-"}</p>
+                <p>{t("status")}: {debugStatus || "-"}</p>
             </div>
         </main>
     );

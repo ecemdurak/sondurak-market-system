@@ -1,16 +1,16 @@
 :root {
-  --color-bg: #eeeeee;
+  --color-bg: #f5f7fb;
   --color-surface: #ffffff;
-  --color-surface-soft: #eeeeee;
-  --color-primary: #da1212;
-  --color-primary-dark: #041562;
-  --color-primary-light: #11468f;
-  --color-text: #041562;
-  --color-muted: #11468f;
-  --color-border: #dddddd;
-  --color-accent: #11468f;
-  --color-danger: #da1212;
-  --shadow-soft: 0 14px 34px rgba(4, 21, 98, 0.1);
+  --color-surface-soft: #d6e4f0;
+  --color-primary: #1f5f99;
+  --color-primary-dark: #0b1f3a;
+  --color-primary-light: #d6e4f0;
+  --color-text: #0b1f3a;
+  --color-muted: #345b7c;
+  --color-border: #d5deea;
+  --color-accent: #163172;
+  --color-danger: #2d4059;
+  --shadow-soft: 0 14px 34px rgba(11, 31, 58, 0.1);
 }
 
 html {
@@ -55,7 +55,7 @@ select {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
-  box-shadow: 0 8px 22px rgba(4, 21, 98, 0.06);
+  box-shadow: 0 8px 22px rgba(11, 31, 58, 0.06);
 }
 
 .barcode-form input {
@@ -114,7 +114,7 @@ button {
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--color-surface);
-  box-shadow: 0 8px 22px rgba(4, 21, 98, 0.07);
+  box-shadow: 0 8px 22px rgba(11, 31, 58, 0.07);
 }
 
 .product-image-frame {
@@ -183,10 +183,10 @@ button {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(238, 238, 238, 0.92);
+  background: rgba(245, 247, 251, 0.92);
   margin-bottom: 28px;
   border-bottom: 1px solid var(--color-border);
-  box-shadow: 0 8px 24px rgba(4, 21, 98, 0.06);
+  box-shadow: 0 8px 24px rgba(11, 31, 58, 0.06);
   backdrop-filter: blur(12px);
 }
 
@@ -348,7 +348,7 @@ button {
   background: var(--color-surface);
   padding: 24px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(4, 21, 98, 0.08);
+  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.08);
 }
 
 .checkout-form input,
@@ -434,7 +434,7 @@ a:active {
 .cart-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(4, 21, 98, 0.38);
+  background: rgba(11, 31, 58, 0.38);
   z-index: 999;
 }
 
@@ -447,7 +447,7 @@ a:active {
   height: 100vh;
   padding: 24px;
   background: var(--color-surface);
-  box-shadow: -6px 0 20px rgba(4, 21, 98, 0.15);
+  box-shadow: -6px 0 20px rgba(11, 31, 58, 0.15);
   z-index: 1000;
   overflow-y: auto;
 }
@@ -530,7 +530,7 @@ a:active {
   padding: 28px;
   background: var(--color-surface);
   border-radius: 8px;
-  box-shadow: 0 12px 28px rgba(4, 21, 98, 0.08);
+  box-shadow: 0 12px 28px rgba(11, 31, 58, 0.08);
 }
 
 .thank-you-status {
@@ -636,7 +636,7 @@ a:active {
   background: var(--color-primary-dark);
   color: white;
   font-weight: 700;
-  box-shadow: 0 12px 28px rgba(4, 21, 98, 0.22);
+  box-shadow: 0 12px 28px rgba(11, 31, 58, 0.22);
 }
 
 .product-actions {
@@ -676,7 +676,7 @@ a:active {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(4, 21, 98, 0.72);
+  background: rgba(11, 31, 58, 0.72);
 }
 
 .payment-modal {
@@ -687,7 +687,7 @@ a:active {
   overflow: hidden;
   border-radius: 14px;
   background: var(--color-surface);
-  box-shadow: 0 24px 80px rgba(4, 21, 98, 0.35);
+  box-shadow: 0 24px 80px rgba(11, 31, 58, 0.35);
 }
 
 .payment-modal-header {
@@ -777,7 +777,7 @@ a:active {
   padding: 24px;
   border-radius: 8px;
   background: var(--color-surface);
-  box-shadow: 0 4px 12px rgba(4, 21, 98, 0.08);
+  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.08);
 }
 
 .admin-form-panel h2,
@@ -934,7 +934,7 @@ a:active {
   padding: 32px;
   border-radius: 8px;
   background: var(--color-surface);
-  box-shadow: 0 18px 45px rgba(4, 21, 98, 0.12);
+  box-shadow: 0 18px 45px rgba(11, 31, 58, 0.12);
 }
 
 .admin-login-form h1 {
@@ -970,7 +970,7 @@ a:active {
   padding: 24px;
   border-radius: 8px;
   background: var(--color-surface);
-  box-shadow: 0 4px 12px rgba(4, 21, 98, 0.08);
+  box-shadow: 0 4px 12px rgba(11, 31, 58, 0.08);
 }
 
 .admin-orders-list {
@@ -1022,7 +1022,7 @@ a:active {
 .scanner-flash {
   position: fixed;
   inset: 0;
-  background: rgba(218, 18, 18, 0.28);
+  background: rgba(31, 95, 153, 0.28);
   z-index: 9999;
   pointer-events: none;
   animation: scannerFlash 0.3s ease-out;

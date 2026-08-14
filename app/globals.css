@@ -783,6 +783,7 @@ a:active {
 
   .header-category-dropdown {
     position: static;
+    display: none;
     width: 100%;
     max-height: 180px;
     margin-top: 8px;
@@ -791,6 +792,11 @@ a:active {
     opacity: 1;
     pointer-events: auto;
     transform: none;
+  }
+
+  .header-category-menu:hover .header-category-dropdown,
+  .header-category-menu:focus-within .header-category-dropdown {
+    display: block;
   }
 }
 

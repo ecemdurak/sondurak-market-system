@@ -1,18 +1,32 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { getOrderById } from "@/backend/services/order.service";
 import { ThankYouCard } from "../../components/thank-you/ThankYouCard";
 import type { Order } from "../../types/order";
 
 async function getOrder(id: string): Promise<Order | null> {
-    const response = await fetch(`http://localhost:3000/api/orders/${id}`, {
-        cache: "no-store",
-    });
+    const orderId = Number(id);
 
-    if (!response.ok) {
+    if (!Number.isInteger(orderId) || orderId <= 0) {
         return null;
     }
 
-    return response.json();
+    const order = await getOrderById(orderId);
+
+    if (!order) {
+        return null;
+    }
+
+    return {
+        ...order,
+        totalPrice: order.totalPrice.toString(),
+        createdAt: order.createdAt.toISOString(),
+        items: order.items.map((item) => ({
+            ...item,
+            unitPrice: item.unitPrice.toString(),
+            totalPrice: item.totalPrice.toString(),
+        })),
+    };
 }
 
 export default async function ThankYouPage({

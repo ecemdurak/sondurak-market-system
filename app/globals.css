@@ -26,7 +26,7 @@ html {
 body {
   width: 100%;
   min-width: 0;
-  overflow-x: clip;
+  overflow-x: hidden;
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
@@ -216,6 +216,11 @@ button {
   align-items: center;
   gap: 18px;
   overflow: visible;
+}
+
+.header-inner *,
+main * {
+  min-width: 0;
 }
 
 .header-logo {
@@ -743,6 +748,49 @@ a:active {
   }
 }
 
+@media (max-width: 768px) {
+  .header {
+    overflow: hidden;
+  }
+
+  .header nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .header nav a,
+  .header-cart-button,
+  .language-toggle {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .header-category-menu {
+    width: 100%;
+  }
+
+  .header-category-trigger {
+    width: 100%;
+    justify-content: center;
+    white-space: normal;
+  }
+
+  .header-category-dropdown {
+    left: 0;
+    right: 0;
+    min-width: 0;
+    transform: translateY(-8px);
+  }
+
+  .header-category-menu:hover .header-category-dropdown,
+  .header-category-menu:focus-within .header-category-dropdown {
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 980px) {
 
   .barcode-form {
@@ -789,11 +837,6 @@ a:active {
   .header-inner {
     padding-right: 10px;
     padding-left: 10px;
-  }
-
-  .header nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .header nav a,

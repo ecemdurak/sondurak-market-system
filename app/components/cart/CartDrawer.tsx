@@ -8,6 +8,7 @@ type CartDrawerProps = {
     totalPrice: number;
     onClose: () => void;
     onRemove: (index: number) => void;
+    onItemRemoved: (title: string) => void;
     t: (key: string) => string;
 };
 
@@ -16,6 +17,7 @@ export function CartDrawer({
     totalPrice,
     onClose,
     onRemove,
+    onItemRemoved,
     t,
 }: CartDrawerProps) {
     return (
@@ -49,7 +51,10 @@ export function CartDrawer({
                             <button
                                 type="button"
                                 className="cart-remove-button"
-                                onClick={() => onRemove(index)}
+                                onClick={() => {
+                                    onRemove(index);
+                                    onItemRemoved(item.title);
+                                }}
                             >
                                 <Icon icon="solar:trash-bin-trash-bold" width={18} height={18} />
                                 {t("remove")}

@@ -17,12 +17,20 @@ export async function loginAdminController(request: Request) {
         message: "Giris basarili.",
     });
 
+    const adminSessionSecret = process.env.ADMIN_SESSION_SECRET;
+
+    if (!adminSessionSecret) {
+        return NextResponse.json(
+            { message: "Admin session secret is missing." },
+            { status: 500 }
+        );
+    }
+
     response.cookies.set(
         "admin_session",
-        process.env.ADMIN_SESSION_SECRET!,
+        adminSessionSecret,
         adminService.getAdminLoginCookieOptions()
     );
-
     return response;
 }
 

@@ -16,13 +16,13 @@ export function middleware(request: NextRequest) {
     }
 
     const adminSession = request.cookies.get("admin_session")?.value;
+    const adminSessionSecret = process.env.ADMIN_SESSION_SECRET;
 
-    if (adminSession !== process.env.ADMIN_SESSION_SECRET) {
+    if (!adminSessionSecret || adminSession !== adminSessionSecret) {
         return NextResponse.redirect(new URL("/admin/login", request.url));
     }
-    return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/admin/:path*"],
+    matcher: ["/admin", "/admin/:path*"],
 };

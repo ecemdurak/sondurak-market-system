@@ -19,7 +19,7 @@ export async function loginAdminController(request: Request) {
 
     response.cookies.set(
         "admin_session",
-        "true",
+        process.env.ADMIN_SESSION_SECRET!,
         adminService.getAdminLoginCookieOptions()
     );
 

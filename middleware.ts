@@ -15,13 +15,11 @@ export function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
-    const adminSession = request.cookies.get("admin_session");
+    const adminSession = request.cookies.get("admin_session")?.value;
 
-    //Bu route korumalıydı ama cookie var, geçmesine izin ver.
-    if (!adminSession) {
+    if (adminSession !== process.env.ADMIN_SESSION_SECRET) {
         return NextResponse.redirect(new URL("/admin/login", request.url));
     }
-
     return NextResponse.next();
 }
 

@@ -33,5 +33,6 @@ export function getAdminLoginCookieOptions() {
         httpOnly: true,
         sameSite: "lax" as const,
         path: "/",
+        maxAge: 60 * 60 * 2,
     };
 }
